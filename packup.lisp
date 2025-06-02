@@ -180,6 +180,8 @@
                                                            (exit :code 1)))))
                    ((probe-file (config-file "config.lisp")) (eval-file (config-file "config.lisp")))
                    ((probe-file (config-file "config.sexp")) (uiop:read-file-form (config-file "config.sexp"))))))
-      (config-backup config))))
+      (if config
+          (config-backup config)
+          (format t "Could not find a config file! Exiting.~%")))))
 
 (main)
