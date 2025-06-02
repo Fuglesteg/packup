@@ -2,7 +2,7 @@
 
 (require "uiop")
 
-(defparameter *backup-location* #P"/var/fuglesteg-backup/")
+(defparameter *backup-location* #P"/var/packup/")
 
 (defparameter *keep-version-count* 12)
 
@@ -188,7 +188,7 @@
 (defun main ()
   (labels ((config-file (name)
            (merge-pathnames (uiop:xdg-config-pathname)
-             (make-pathname :directory (list :relative "fuglesteg-backup")
+             (make-pathname :directory (list :relative "packup")
                             :name name))))
     (let ((config (cond 
                     ((uiop:command-line-arguments) (let ((config-file (parse-native-namestring (first (uiop:command-line-arguments)))))
