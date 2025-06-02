@@ -51,27 +51,6 @@
       (make-pathname :directory (pathname-directory path))
       (make-pathname :directory (butlast (pathname-directory path)))))
 
-(defun string-until-separator (string separator)
- (subseq string 0 (search separator string)))
-
-(defun string-after-separator (string separator)
-  (subseq string (+ (search separator string) (length separator))))
-
-(defun backup-find-previous (path)
-  (sort
-   (loop for entry in (directory-contents (basedir path))
-         when (string= 
-               (string-until-separator
-                (basename path)
-                *backup-version-separator*) 
-               (string-until-separator
-                (basename entry)
-                *backup-version-separator*))
-         collect entry)
-   (lambda (entry1 entry2)
-     (< (parse-integer (string-after-separator (basename entry1) *backup-version-separator*))
-        (parse-integer (string-after-separator (basename entry2) *backup-version-separator*))))))
-
 (defun pathname-with-new-name (pathname new-name) 
   (if (pathname-name pathname)
       (make-pathname :defaults pathname
