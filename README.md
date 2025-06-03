@@ -21,6 +21,31 @@ channel](https://github.com/fuglesteg/guix-fuglesteg-channel) as a package.
 Using this version means that the script no longer runs in a guix shell
 environmnent.
 
+## Folder structure
+
+The default folder structure will group backups into two main folders: `devices` and `synced`.
+These are further explained in the [configuration](#Configuration) section.
+
+```
+.
+├── devices
+│   ├── K8
+│   │   ├── 1
+│   │   ├── 2
+│   │   └── 3
+│   └── K80
+│       ├── 1
+│       ├── 2
+│       └── 3
+└── synced
+    ├── 1
+    ├── 2
+    ├── 3
+    ├── 4
+    ├── 5
+    └── 6
+```
+
 ## Configuration
 
 Packup uses a config file to describe the files and folders that should be
