@@ -166,9 +166,11 @@
 
 (defun main ()
   (labels ((config-file (name)
-           (merge-pathnames (uiop:xdg-config-pathname)
-             (make-pathname :directory (list :relative "packup")
-                            :name name))))
+             (print (destructuring-bind (name type) (uiop:split-string name :separator '(#\.))
+                      (merge-pathnames (make-pathname :directory (list :relative "packup")
+                                                      :name name
+                                                      :type type)
+                                       (uiop:xdg-config-pathname))))))
     (let ((config (cond 
                     ((uiop:command-line-arguments) (let ((config-file (parse-native-namestring (first (uiop:command-line-arguments)))))
                                                      (if (probe-file config-file)
