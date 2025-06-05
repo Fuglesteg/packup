@@ -93,7 +93,7 @@ A config using `.lisp`:
 ## Remarks
 
 Packup has no presumptions of how often it should run. For example with the
-default `version-count` of 12 you can run the script once a week and have 2
+default `version-count` of 12 you can run the script once a week and have 3
 months worth of backups.
 
 Packup does not have any facilities for timed services,
