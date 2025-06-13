@@ -55,11 +55,11 @@ will look for a `config.lisp` or `config.sexp` in `$XDG_CONFIG_HOME/packup/`.
 The config can either be a static S-expression `config.sexp` or a lisp file
 `config.lisp`. The lisp file must evaluate to a config form.
 
-The config form has 5 clauses:
+The config form has 5 fields:
 
 - `device-files`: Files local to this device.
 - `synced-files`: Files that are presumed synced using another service, like syncthing, that should still get a local backup, but don't need to be synced to other devices.
-- `devices`: Other devices that should have there backups synced to this device.
+- `devices`: Other devices that should have their backups synced to this device.
 - `backup-location`: Location of backups, by default `/var/packup/`.
 - `version-count`: How many versions to keep, by default `12`.
 
