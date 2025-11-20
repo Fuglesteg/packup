@@ -1,4 +1,4 @@
-#!/usr/bin/env -S guix shell sbcl rsync -- sbcl --script
+#!/usr/bin/env -S guix shell sbcl rsync openssh -- sbcl --script
 
 (require "uiop")
 
@@ -51,7 +51,7 @@
       (make-pathname :directory (pathname-directory path))
       (make-pathname :directory (butlast (pathname-directory path)))))
 
-(defun pathname-with-new-name (pathname new-name) 
+(defun pathname-with-new-name (pathname new-name)
   (if (pathname-name pathname)
       (make-pathname :defaults pathname
                      :name new-name)
@@ -84,7 +84,7 @@
   (when (> (length backups) *keep-version-count*)
     (mapcar #'delete-file-or-directory
             (subseq backups *keep-version-count*))))
-   
+
 (defun backup-path (path)
   (merge-pathnames path
                    *backup-location*))
@@ -160,21 +160,25 @@
   (destructuring-bind (&key devices device-files synced-files backup-location version-count) config
     (let ((*backup-location* (or backup-location *backup-location*))
           (*keep-version-count* (or version-count *keep-version-count*)))
-      (backup synced-files :synced)
-      (backup device-files :device)
-      (fetch-device-backups devices))))
+      (handler-case
+          (progn
+            (backup synced-files :synced)
+            (backup device-files :device)
+            (fetch-device-backups devices))
+      (error (condition)
+        (format t "Sync failed!"))))))
 
 (defun main ()
   (labels ((config-file (name)
-             (print (destructuring-bind (name type) (uiop:split-string name :separator '(#\.))
+             (destructuring-bind (name type) (uiop:split-string name :separator '(#\.))
                       (merge-pathnames (make-pathname :directory (list :relative "packup")
                                                       :name name
                                                       :type type)
-                                       (uiop:xdg-config-pathname))))))
-    (let ((config (cond 
+                                       (uiop:xdg-config-pathname)))))
+    (let ((config (cond
                     ((uiop:command-line-arguments) (let ((config-file (parse-native-namestring (first (uiop:command-line-arguments)))))
                                                      (if (probe-file config-file)
-                                                         (cond 
+                                                         (cond
                                                            ((string= (pathname-type config-file) "sexp") (uiop:read-file-form config-file))
                                                            ((string= (pathname-type config-file) "lisp") (eval-file config-file)))
                                                          (progn
