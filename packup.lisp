@@ -3,6 +3,7 @@
 (require "uiop")
 
 (defparameter *backup-location* #P"/var/packup/")
+(defparameter *remote-shell* "ssh")
 
 (defparameter *keep-version-count* 12)
 
@@ -15,6 +16,8 @@
   "Uses rsync to sync remotely or locally"
   (let ((command (list "rsync"
                        "-a"
+                       "-e"
+                       *remote-shell*
                        "--delete"
                        "--mkpath"
                        "--quiet"
@@ -166,7 +169,8 @@
             (backup device-files :device)
             (fetch-device-backups devices))
       (error (condition)
-        (format t "Sync failed!"))))))
+        (format t "Sync failed!")
+        (exit :abort t))))))
 
 (defun main ()
   (labels ((config-file (name)
