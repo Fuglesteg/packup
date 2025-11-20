@@ -36,10 +36,10 @@
                             (list to))))
     (format t "~{~a ~}~%" command)
     (multiple-value-bind (output error-output exit-code)
-        (uiop:run-program command)
-      (declare (ignore output error-output))
+        (uiop:run-program command :ignore-error-status t)
+      (declare (ignore output))
       (unless (= exit-code 0)
-        (error "Unsuccessfull sync")))))
+        (error "Unsuccessfull sync: ~a" error-output)))))
 
 (defun directory-contents (directory)
   (append (uiop:directory-files directory)
@@ -169,7 +169,8 @@
             (backup device-files :device)
             (fetch-device-backups devices))
       (error (condition)
-        (format t "Sync failed!")
+        (format t "Sync failed:~%~a" condition)
+        (format t "~%Exiting!~%")
         (exit :abort t))))))
 
 (defun main ()
