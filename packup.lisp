@@ -12,21 +12,23 @@
     (string pathname-or-string)
     (pathname (uiop:native-namestring pathname-or-string))))
 
-(defun sync (from to &key base)
+(defun sync (from to &key base identity)
   "Uses rsync to sync remotely or locally"
   (let ((command (list "rsync"
                        "-a"
                        "-e"
-                       *remote-shell*
+                       (if identity
+                           (format nil "~a -i ~a" *remote-shell* (ensure-namestring identity))
+                           *remote-shell*)
                        "--delete"
                        "--mkpath"
                        "--quiet"
                        "--inplace"
                        "--backup")))
     (when base
-        (setf command (append command
-                              (list
-                               (format nil "--link-dest=~a" (ensure-namestring base))))))
+      (setf command (append command
+                            (list
+                             (format nil "--link-dest=~a" (ensure-namestring base))))))
     (let ((from (if (listp from)
                     (mapcar #'ensure-namestring from)
                     (list (ensure-namestring from))))
@@ -36,7 +38,7 @@
                             (list to))))
     (format t "~{~a ~}~%" command)
     (multiple-value-bind (output error-output exit-code)
-        (uiop:run-program command :ignore-error-status t)
+        (uiop:run-program command :ignore-error-status t :output t :error-output t)
       (declare (ignore output))
       (unless (= exit-code 0)
         (error "Unsuccessfull sync: ~a" error-output)))))
@@ -137,7 +139,7 @@
     (backups-update-version (backup-previous-versions backup-path))
     (backups-delete-excess (backup-previous-versions backup-path))))
 
-(defun fetch-device-backups (devices)
+(defun fetch-device-backups (devices &key identity)
   (dolist (device devices)
     (destructuring-bind (hostname . url)
         (if (consp device)
@@ -152,7 +154,8 @@
            (host-path-namestring url
                                  base-path)
            backup-path
-           :base base-path)
+           :base base-path
+           :identity identity)
           (backups-update-version (backup-previous-versions backup-path))
           (backups-delete-excess (backup-previous-versions backup-path)))))))
 
@@ -160,14 +163,19 @@
   (eval `(progn ,@(uiop:read-file-forms file))))
 
 (defun config-backup (config)
-  (destructuring-bind (&key devices device-files synced-files backup-location version-count) config
+  (destructuring-bind (&key devices
+                            device-files
+                            synced-files
+                            backup-location
+                            version-count
+                            identity-file) config
     (let ((*backup-location* (or backup-location *backup-location*))
           (*keep-version-count* (or version-count *keep-version-count*)))
       (handler-case
           (progn
             (backup synced-files :synced)
             (backup device-files :device)
-            (fetch-device-backups devices))
+            (fetch-device-backups devices :identity identity-file))
       (error (condition)
         (format t "Sync failed:~%~a" condition)
         (format t "~%Exiting!~%")
